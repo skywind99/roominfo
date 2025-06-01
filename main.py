@@ -14,7 +14,7 @@ def load_data():
 
 df = load_data()
 
-st.title("학생 정보 암호화 열람 시스템")
+st.title("학생 정보 열람 시스템")
 
 # --- 어드민 로그인 ---
 with st.sidebar:
