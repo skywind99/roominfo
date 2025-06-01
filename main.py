@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import hashlib
 
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1tg6FyQ8rKjS63xur6lncTT1bpGDei0CLadcrtZ2nSTo/export?format=csv"
-ADMIN_PASSWORD = "admin1234"   # 실제 서비스에서는 환경변수나 secrets.toml 사용 권장
+# ADMIN_PASSWORD = "admin1234"   # 실제 서비스에서는 환경변수나 secrets.toml 사용 권장
 
 @st.cache_data
 def load_data():
