@@ -19,7 +19,7 @@ st.title("학생 정보 열람 시스템")
 # --- 어드민 로그인 ---
 with st.sidebar:
     st.subheader("🔒 어드민 로그인")
-    admin_input = st.text_input("어드민 비밀번호", type="password")
+    admin_input = st.text_input("어드민 비밀번호(테스트용:1234)", type="password")
     admin_login = st.button("어드민 로그인")
     admin_mode = False
 
