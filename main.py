@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 import hashlib
 
-# 구글시트 CSV 불러오기
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1tg6FyQ8rKjS63xur6lncTT1bpGDei0CLadcrtZ2nSTo/export?format=csv"
+ADMIN_PASSWORD = "admin1234"   # 실제 서비스에서는 환경변수나 secrets.toml 사용 권장
+
 @st.cache_data
 def load_data():
     df = pd.read_csv(SHEET_URL)
-    # 컬럼명 자동감지 (혹시 헤더가 두줄이면 수정 필요)
     df.columns = [c.strip() for c in df.columns]
     return df
 
@@ -15,12 +15,37 @@ df = load_data()
 
 st.title("학생 정보 암호화 열람 시스템")
 
-# 사용자 입력
+# --- 어드민 로그인 ---
+with st.sidebar:
+    st.subheader("🔒 어드민 로그인")
+    admin_input = st.text_input("어드민 비밀번호", type="password")
+    admin_login = st.button("어드민 로그인")
+    admin_mode = False
+
+    if admin_login:
+        if admin_input == ADMIN_PASSWORD:
+            st.success("어드민 인증 성공!")
+            admin_mode = True
+        else:
+            st.error("비밀번호가 틀렸습니다.")
+
+# --- 어드민 모드: 구글시트 전체 보기 ---
+if "admin_mode" not in st.session_state:
+    st.session_state.admin_mode = False
+
+if admin_login and admin_input == ADMIN_PASSWORD:
+    st.session_state.admin_mode = True
+
+if st.session_state.admin_mode:
+    st.subheader("전체 학생 정보 테이블")
+    st.dataframe(df)
+    st.stop()
+
+# --- 일반 사용자: 방호수 조회 ---
 name = st.text_input("이름을 입력하세요")
 birth = st.text_input("생년월일 8자리 (예: 20130824)")
 
 def hash_key(name, birth):
-    # 이름+생년월일(공백없음)을 sha256으로 암호화
     base = (name.strip() + birth.strip()).encode("utf-8")
     return hashlib.sha256(base).hexdigest()
 
@@ -28,9 +53,7 @@ if st.button("방호수 조회하기"):
     if not name or not birth:
         st.warning("이름과 생년월일을 모두 입력하세요.")
     else:
-        # 사용자 입력 암호화
         input_hash = hash_key(name, birth)
-        # 시트에 있는 각각의 row도 똑같이 암호화해서 비교
         matched_row = None
         for idx, row in df.iterrows():
             row_hash = hash_key(str(row["이름"]), str(row["생년월일"]))
@@ -38,9 +61,9 @@ if st.button("방호수 조회하기"):
                 matched_row = row
                 break
         if matched_row is not None:
-            st.success(f"방호수: {matched_row['호실배정']}")
+            st.success(f"방호수: {matched_row['방호수']}")
         else:
             st.error("해당 정보를 찾을 수 없습니다.")
 
 st.markdown("---")
-st.caption("※ 모든 정보는 입력값을 sha256으로 변환하여 검색하며, 시트의 원본 정보는 외부에 노출되지 않습니다.")
+st.caption("※ 어드민만 전체 데이터 열람 가능. 일반 사용자는 이름/생년월일로 방호수만 조회됩니다.")
