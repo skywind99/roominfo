@@ -38,7 +38,7 @@ if st.button("방호수 조회하기"):
                 matched_row = row
                 break
         if matched_row is not None:
-            st.success(f"방호수: {matched_row['방호수']}")
+            st.success(f"방호수: {matched_row['호실배정']}")
         else:
             st.error("해당 정보를 찾을 수 없습니다.")
 
